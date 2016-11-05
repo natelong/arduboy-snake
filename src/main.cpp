@@ -2,7 +2,8 @@
 
 #include "lib/common.h"
 #include "lib/sys.h"
-#include "lib/oled.h"
+
+#include "game.h"
 
 int main(void) {
     init();
@@ -13,12 +14,17 @@ int main(void) {
 
     SysInit();
 
+
+    Game game;
+
     for (;;) {
       if(SysLoop() == FALSE){
         continue;
       }
 
-      OledDrawStr(0, 0, "Hey Stephanie!");
+      game.update();
+      game.draw();
+
       SysLoopEnd();
       if (serialEventRun) serialEventRun();
     }
