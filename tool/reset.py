@@ -8,6 +8,11 @@ if len(sys.argv) != 2:
     exit()
 
 port = sys.argv[1]
-ser = serial.Serial(port=port, baudrate=1200)
-ser.close()
-time.sleep(2)
+try:
+    ser = serial.Serial(port=port, baudrate=1200)
+except serial.SerialException:
+    print "Couldn't connect to device at", port
+    exit(1)
+else:
+    ser.close()
+    time.sleep(2)

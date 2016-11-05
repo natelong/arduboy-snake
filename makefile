@@ -117,12 +117,12 @@ DFILES = $(addprefix $(OBJDIR)/, $(addsuffix .d, $(notdir $(CFILES))))
 .PHONY: all usb clean
 
 all:
-	@echo "Building $(TARGET_HEX)..."
 	@make $(TARGET_HEX)
-	@echo "\nBinary size stats:"
+
+size: all
 	$(BINPATH)/avr-size $(TARGET_ELF) -C --mcu=$(MCU_NAME)
 
-usb: all
+usb:
 	@python tool/reset.py $(COM)
 	@$(BINPATH)/avrdude -C$(CONFFILE) -p$(MCU_NAME) -c$(PROTOCOL) -P$(COM) -b$(SPEED) -D -Uflash:w:$(TARGET_HEX):i
 
@@ -135,7 +135,6 @@ $(TARGET_HEX): $(TARGET_ELF)
 	$(OBJCOPY) -O ihex -R .eeprom $< $@
 
 $(TARGET_ELF): $(OBJDIR) $(OUTDIR) $(OFILES) Makefile
-	# @echo "\nLinking $@"
 	$(AR) rcs $(OBJDIR)/core.a $(OFILES)
 	$(LD) $(LDFLAGS) -o $@ $(OBJDIR)/core.a
 	$(NM) -n $@ > $(NMFILE)
@@ -151,19 +150,15 @@ $(OUTDIR):
 .SUFFIXES: .S .s .cpp .c .o .a .d
 
 $(OBJDIR)/%.cpp.o: %.cpp
-	# @echo "\ncompiling $<"
 	$(CPP) $(GFLAGS) $< -o $@
 
 $(OBJDIR)/%.c.o: %.c
-	# @echo "\ncompiling $<"
 	$(CC) $(CFLAGS) $< -o $@
 
 $(OBJDIR)/%.s.o: %.s
-	# @echo "\nassembling $<"
 	$(AS) $(ASFLAGS) $< -o $@
 
 $(OBJDIR)/%.S.o: %.S
-	# @echo "\nassembling $<"
 	$(AS) $(ASFLAGS) $< -o $@
 
 -include $(DFILES)
