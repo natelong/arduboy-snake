@@ -14,7 +14,6 @@ DEV_NAME      = "Arduino Leonardo"
 PREFIX  = $(BINPATH)/avr-
 CPP	    = $(PREFIX)g++
 CC      = $(PREFIX)gcc
-AS      = $(PREFIX)gcc
 AR      = $(PREFIX)ar
 LD      = $(PREFIX)gcc
 OBJCOPY = $(PREFIX)objcopy
@@ -24,19 +23,13 @@ SRCDIR  = src
 COREDIR = $(SRCDIR)/core
 LIBDIR  = $(SRCDIR)/lib
 
-SFILES = \
-	$(wildcard $(SRCDIR)/*.s) \
-	$(wildcard $(SRCDIR)/*.S) \
-	$(wildcard $(SRCDIR)/**/*.s) \
-	$(wildcard $(SRCDIR)/**/*.S) \
-
 CFILES = \
 	$(wildcard $(SRCDIR)/*.c) \
 	$(wildcard $(SRCDIR)/*.cpp) \
 	$(wildcard $(SRCDIR)/**/*.c) \
 	$(wildcard $(SRCDIR)/**/*.cpp) \
 
-VPATH  = $(dir $(CFILES) $(SFILES))
+VPATH  = $(dir $(CFILES))
 INCDIR = $(COREDIR)/
 
 OBJDIR     = obj
@@ -92,14 +85,6 @@ CFLAGS = \
     $(foreach incdir,$(INCDIR),-I$(incdir)) \
     -x c
 
-ASFLAGS = \
-    -c \
-    -g \
-    -x assembler-with-cpp \
-    -mmcu=$(MCU_NAME) $(DFLAGS) \
-    -DUSB_PRODUCT=$(DEV_NAME) \
-    $(foreach incdir,$(INCDIR),-I$(incdir))
-
 LDFLAGS = \
     -Wall \
     -Wextra \
@@ -108,7 +93,7 @@ LDFLAGS = \
     -Wl,-Map=$(MAPFILE) \
     -mmcu=$(MCU_NAME)
 
-OFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(notdir $(SFILES) $(CFILES))))
+OFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(notdir $(CFILES))))
 
 DFILES = $(addprefix $(OBJDIR)/, $(addsuffix .d, $(notdir $(CFILES))))
 
@@ -147,18 +132,12 @@ $(OUTDIR):
 
 #=============================================================================
 
-.SUFFIXES: .S .s .cpp .c .o .a .d
+.SUFFIXES: .cpp .c .o .a .d
 
 $(OBJDIR)/%.cpp.o: %.cpp
 	$(CPP) $(GFLAGS) $< -o $@
 
 $(OBJDIR)/%.c.o: %.c
 	$(CC) $(CFLAGS) $< -o $@
-
-$(OBJDIR)/%.s.o: %.s
-	$(AS) $(ASFLAGS) $< -o $@
-
-$(OBJDIR)/%.S.o: %.S
-	$(AS) $(ASFLAGS) $< -o $@
 
 -include $(DFILES)
